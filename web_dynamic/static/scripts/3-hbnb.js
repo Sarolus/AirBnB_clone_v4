@@ -1,40 +1,51 @@
-$(document).ready(function () {
-  const checkedAmenity = [];
-  $('input').click(function () {
-    const dataId = $(this).attr('data-id');
-    const dataName = $(this).attr('data-name');
-    if ($(this).is(':checked')) {
-      checkedAmenity[dataId] = dataName;
-    } else {
-      delete checkedAmenity[dataId];
-    }
-    const arrayAmenity = $.map(checkedAmenity, function (dataName) {
-      return dataName;
-    });
-    $('.amenities h4').text(arrayAmenity.join(', '));
-  });
-});
 
-$(function () {
+const checkedAmenity = [];
+
+const checkAmenities = function () {
+  $(document).ready(function () {
+    $('input').click(function () {
+      const dataId = $(this).attr('data-id');
+      const dataName = $(this).attr('data-name');
+      if ($(this).is(':checked')) {
+        checkedAmenity[dataId] = dataName;
+      } else {
+        delete checkedAmenity[dataId];
+      }
+      const arrayAmenity = $.map(checkedAmenity, function (dataName) {
+        return dataName;
+      });
+      $('.amenities h4').text(arrayAmenity.join(', '));
+    });
+  });
+}
+
+
+const checkStatus = function () {
   const url = 'http://0.0.0.0:5001/api/v1/status/';
   $.get(url, function (data) {
     if (data.status === 'OK') {
       $('header #api_status').addClass('available');
     }
   });
+}
+
+const postPlaces = function () {
   $.ajax({
-	type: 'POST',
-	url: 'http://0.0.0.0:5001/api/v1/places_search/',
-	data: '{}',
-	contentType: 'application/json',
-	success: (response) => {
-		response.forEach(element => {
-		const htmlContent = articleHtml(element);
-		$(htmlContent).appendTo('.places');
-		});
-	}
+    type: 'POST',
+    url: 'http://0.0.0.0:5001/api/v1/places_search/',
+    data: '{}',
+    contentType: 'application/json',
+    success: (response) => {
+      response.forEach(element => {
+      const htmlContent = articleHtml(element);
+      $(htmlContent).appendTo('.places');
+      });
+    }
   });
-  function articleHtml(element) {
+}
+
+  
+function articleHtml(element) {
 	return (`
 	  <article>
 		<div class='title_box'>
@@ -49,5 +60,13 @@ $(function () {
 		<div class='description'>${element.description}</div>
 	  </article>`
 	);
-  }
+}
+
+$(() => {
+  checkAmenities();
+  checkStatus();
+  postPlaces(checkedAmenity);
+  $('button').on('click', () => {
+    postPlaces(checkedAmenity);
+  });
 });
